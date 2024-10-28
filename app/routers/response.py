@@ -6,7 +6,7 @@ from app.schemas.response import ResponseCreate, ResponseResponse
 bp = Blueprint('responses', __name__, url_prefix='/responses')
 
 
-@bp.route('/', methods=['POST'])
+@bp.route('', methods=['POST'])
 def create_response():
     try:
         data = request.json

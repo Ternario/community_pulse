@@ -1,12 +1,13 @@
 from flask import Blueprint, request, jsonify
 from app import db
+from app.models.category import Category
 from app.models.questions import Question
 from app.schemas.question import QuestionCreate, QuestionResponse
 
 bp = Blueprint('questions', __name__, url_prefix='/questions')
 
 
-@bp.route('/', methods=['GET'])
+@bp.route('', methods=['GET'])
 def get_questions():
     try:
         questions = Question.query.all()
@@ -15,12 +16,20 @@ def get_questions():
         return jsonify({'error': str(e)}), 400
 
 
-@bp.route('/add', methods=['POST'])
+@bp.route('', methods=['POST'])
 def create_question():
     try:
         data = request.json
         schema = QuestionCreate(**data)
-        new_question = Question(title=schema.title, description=schema.description)
+        category = Category.query.get(schema.category_id)
+        if not category:
+            return jsonify({'error': 'Category not found'}), 404
+
+        new_question = Question(
+            title=schema.title,
+            description=schema.description,
+            category_id=schema.category_id
+        )
         db.session.add(new_question)
         db.session.commit()
         return jsonify(QuestionResponse.from_orm(new_question).dict()), 201
